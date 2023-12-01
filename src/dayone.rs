@@ -1,7 +1,9 @@
+use rayon::prelude::*;
+
 pub fn solve_part_one(input: &str) -> u32 {
     input
         .trim()
-        .lines()
+        .par_lines()
         .map(|line| {
             let digits: Vec<_> = line
                 .chars()
@@ -31,7 +33,7 @@ pub fn solve_part_two(input: &str) -> u32 {
     ];
     input
         .trim()
-        .lines()
+        .par_lines()
         .map(|line| {
             let mut digit_pos_pairs = vec![];
             for word in words.iter() {

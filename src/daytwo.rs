@@ -1,4 +1,4 @@
-use itertools::Itertools;
+use self::parser::parse_input;
 
 #[derive(Debug, PartialEq)]
 enum Cube {
@@ -7,8 +7,50 @@ enum Cube {
     Green(usize),
 }
 
+mod parser {
+    use itertools::Itertools;
+
+    use super::Cube;
+
+    pub fn parse_input(input: &str) -> Vec<Vec<Vec<Cube>>> {
+        input
+            .trim()
+            .lines()
+            .map(|line| line.trim())
+            .map(|line| parse_line(line))
+            .collect_vec()
+    }
+
+    pub fn parse_line(line: &str) -> Vec<Vec<Cube>> {
+        line.split(";")
+            .map(|inner| parse_inner(inner))
+            .collect_vec()
+    }
+
+    pub fn parse_inner(mut section: &str) -> Vec<Cube> {
+        if section.contains(":") {
+            section = section.split(":").collect_vec()[1];
+        }
+        section = section.trim();
+        let items = section
+            .split(",")
+            .map(|item| {
+                let (count, color) = item.split_whitespace().collect_tuple().unwrap();
+                let count: usize = count.parse().unwrap();
+                return match color {
+                    "red" => Cube::Red(count),
+                    "blue" => Cube::Blue(count),
+                    "green" => Cube::Green(count),
+                    _ => panic!("Invalid cube color"),
+                };
+            })
+            .collect_vec();
+        return items;
+    }
+}
+
 pub fn solve_part_one(input: &str, rgb_limits: (u32, u32, u32)) -> u32 {
-    let parsed = parse_input(input);
+    let parsed = parser::parse_input(input);
     let mut possible_games = vec![];
     for (index, line) in parsed.iter().enumerate() {
         if is_line_possible(line, rgb_limits) {
@@ -54,21 +96,6 @@ pub fn solve_part_two(input: &str) -> u32 {
         .sum::<u32>()
 }
 
-fn parse_input(input: &str) -> Vec<Vec<Vec<Cube>>> {
-    input
-        .trim()
-        .lines()
-        .map(|line| line.trim())
-        .map(|line| parse_line(line))
-        .collect_vec()
-}
-
-fn parse_line(line: &str) -> Vec<Vec<Cube>> {
-    line.split(";")
-        .map(|inner| parse_inner(inner))
-        .collect_vec()
-}
-
 fn get_power_from_line(parsed_line: &Vec<Vec<Cube>>) -> u32 {
     let (red, green, blue) = max_by_color(parsed_line);
     return (red * green * blue) as u32;
@@ -100,35 +127,15 @@ fn max_by_color(parsed_line: &Vec<Vec<Cube>>) -> (usize, usize, usize) {
     return (red, green, blue);
 }
 
-fn parse_inner(mut section: &str) -> Vec<Cube> {
-    if section.contains(":") {
-        section = section.split(":").collect_vec()[1];
-    }
-    section = section.trim();
-    let items = section
-        .split(",")
-        .map(|item| {
-            let (count, color) = item.split_whitespace().collect_tuple().unwrap();
-            let count: usize = count.parse().unwrap();
-            return match color {
-                "red" => Cube::Red(count),
-                "blue" => Cube::Blue(count),
-                "green" => Cube::Green(count),
-                _ => panic!("Invalid cube color"),
-            };
-        })
-        .collect_vec();
-    return items;
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::daytwo::parser::parse_line;
 
     #[test]
     fn test_simple_power_from_line() {
         let line = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
         let expected = 48;
-        let parsed_line = super::parse_line(line);
+        let parsed_line = parse_line(line);
         let actual = super::get_power_from_line(&parsed_line);
         assert_eq!(actual, expected);
     }
@@ -158,7 +165,7 @@ mod tests {
                 super::Cube::Green(7),
             ],
         ];
-        let actual = super::parse_line(line);
+        let actual = parse_line(line);
         assert_eq!(actual, expected);
         let exected_possible = true;
         let actual_possible = super::is_line_possible(&actual, (12, 13, 14));
@@ -177,7 +184,7 @@ mod tests {
             ],
             vec![super::Cube::Green(2)],
         ];
-        let actual = super::parse_line(line);
+        let actual = parse_line(line);
         assert_eq!(actual, expected);
     }
 
@@ -197,7 +204,7 @@ mod tests {
                 super::Cube::Red(14),
             ],
         ];
-        let actual = super::parse_line(line);
+        let actual = parse_line(line);
         assert_eq!(actual, expected);
     }
 

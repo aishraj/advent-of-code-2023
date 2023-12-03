@@ -1,7 +1,7 @@
 use self::parser::parse_input;
 
 #[derive(Debug, PartialEq)]
-enum Cube {
+pub enum Cube {
     Blue(usize),
     Red(usize),
     Green(usize),

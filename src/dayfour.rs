@@ -110,6 +110,6 @@ mod tests {
     #[test]
     fn solves_4_2_hard() {
         let input = std::fs::read_to_string("input/4_real.txt").unwrap();
-        assert_eq!(super::solve_part_two(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 8805731);
     }
 }

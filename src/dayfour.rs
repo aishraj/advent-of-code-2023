@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use itertools::Itertools;
 
@@ -47,11 +47,11 @@ pub fn solve_part_two(input: &str) -> u32 {
         // this means we have that many cards of the next n overlapping numbers
         //println!("current group: {:?}", group_index);
         let repeating_factor = card_counts.get(&group_index).unwrap();
-        for i in 0..*repeating_factor {
+        for _i in 0..*repeating_factor {
             for j in (group_index + 1)..=(group_index + overlap_count) {
                 //println!("adding card to group: {}", j);
                 let card_count = card_counts.get_mut(&j).unwrap();
-                let original_count = *card_count;
+                //let original_count = *card_count;
                 // println!(
                 //     "j: {} increasing card count from {} to {}",
                 //     j,

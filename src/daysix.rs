@@ -1,8 +1,6 @@
-use core::time;
-
 use itertools::Itertools;
 
-pub fn solve_part_one(input: &str) -> u32 {
+pub fn solve_part_one(input: &str) -> u64 {
     let (times, dist) = parse_input(input);
     let mut prod = 1;
     for i in 0..dist.len() {
@@ -15,25 +13,39 @@ pub fn solve_part_one(input: &str) -> u32 {
                 numbers.push(x);
             }
         }
-        println!("numbers: {:?}", numbers);
-        prod *= numbers.len() as u32;
+        //println!("numbers: {:?}", numbers);
+        prod *= numbers.len() as u64;
     }
     return prod;
 }
 
-pub fn solve_part_two(input: &str) -> u32 {
-    42
+pub fn solve_part_two(input: &str) -> u64 {
+    let (times, dist) = parse_input(input);
+    let times_string = times.iter().map(|x| x.to_string()).join("");
+    let dist_string = dist.iter().map(|x| x.to_string()).join("");
+    let times = times_string.parse::<u64>().unwrap();
+    let dist = dist_string.parse::<u64>().unwrap();
+    let mut prod = 1;
+    let mut numbers = vec![];
+    for x in 0..=times {
+        let dx = x * (times - x);
+        if dx > dist {
+            numbers.push(x);
+        }
+    }
+    //println!("numbers: {:?}", numbers);
+    prod *= numbers.len() as u64;
+    return prod;
 }
 
-fn parse_input(input: &str) -> (Vec<u32>, Vec<u32>) {
+fn parse_input(input: &str) -> (Vec<u64>, Vec<u64>) {
     let lines: Vec<&str> = input.lines().collect();
-    let mut ans = 0;
 
-    let times: Vec<u32> = lines[0].split(':').collect_vec()[1]
+    let times: Vec<u64> = lines[0].split(':').collect_vec()[1]
         .split_whitespace()
         .map(|x| x.parse().unwrap())
         .collect();
-    let dist: Vec<u32> = lines[1].split(':').collect_vec()[1]
+    let dist: Vec<u64> = lines[1].split(':').collect_vec()[1]
         .split_whitespace()
         .map(|x| x.parse().unwrap())
         .collect();
@@ -66,12 +78,12 @@ mod tests {
     #[test]
     fn solves_6_2_easy() {
         let input = std::fs::read_to_string("input/6_easy.txt").unwrap();
-        assert_eq!(super::solve_part_two(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 71503);
     }
 
     #[test]
     fn solves_6_2_hard() {
         let input = std::fs::read_to_string("input/6_real.txt").unwrap();
-        assert_eq!(super::solve_part_two(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 34934171);
     }
 }

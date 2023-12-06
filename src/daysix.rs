@@ -6,15 +6,15 @@ pub fn solve_part_one(input: &str) -> u64 {
     for i in 0..dist.len() {
         let time = times[i];
         let dist = dist[i];
-        let mut numbers = vec![];
+        let mut numbers = 0;
         for x in 0..=time {
             let dx = x * (time - x);
             if dx > dist {
-                numbers.push(x);
+                numbers += 1;
             }
         }
         //println!("numbers: {:?}", numbers);
-        prod *= numbers.len() as u64;
+        prod *= numbers;
     }
     return prod;
 }
@@ -26,15 +26,15 @@ pub fn solve_part_two(input: &str) -> u64 {
     let times = times_string.parse::<u64>().unwrap();
     let dist = dist_string.parse::<u64>().unwrap();
     let mut prod = 1;
-    let mut numbers = vec![];
+    let mut numbers = 0;
     for x in 0..=times {
         let dx = x * (times - x);
         if dx > dist {
-            numbers.push(x);
+            numbers += 1;
         }
     }
     //println!("numbers: {:?}", numbers);
-    prod *= numbers.len() as u64;
+    prod *= numbers;
     return prod;
 }
 

@@ -1,27 +1,43 @@
+use core::fmt::Display;
 use itertools::Itertools;
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone)]
 pub struct Hand(Vec<u64>);
 
+impl Display for Hand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let cards = self.0.clone();
+        let cards: Vec<String> = cards.iter().map(|c| card_string(*c)).collect();
+        write!(f, "{}", cards.join(""))
+    }
+}
+
+fn card_string(card: u64) -> String {
+    match card {
+        14 => "A".to_string(),
+        13 => "K".to_string(),
+        12 => "Q".to_string(),
+        11 => "J".to_string(),
+        10 => "T".to_string(),
+        _ => card.to_string(),
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Category {
-    FiveOfAKind,
-    FourOfAKind,
-    FullHouse,
-    ThreeOfAKind,
-    TwoOfAKind,
-    TwoPair,
-    OnePair,
     HighCard,
+    OnePair,
+    TwoPair,
+    ThreeOfAKind,
+    FullHouse,
+    FourOfAKind,
+    FiveOfAKind,
 }
 
 pub fn parse_line(line: &str) -> (Hand, u64) {
     let (raw_cards, raw_score) = line.split_ascii_whitespace().collect_tuple().unwrap();
-    let cards = raw_cards
-        .chars()
-        .map(|c| card_value(c))
-        .sorted()
-        .collect_vec();
+    let cards = raw_cards.chars().map(|c| card_value(c)).collect_vec();
     let score = raw_score.parse::<u64>().unwrap();
     (Hand(cards), score)
 }
@@ -39,60 +55,37 @@ fn card_value(card: char) -> u64 {
 
 impl Hand {
     pub fn category(&self) -> Category {
-        let mut counts = vec![0; 15];
-        for card in &self.0 {
-            counts[*card as usize] += 1;
+        let mut counts = BTreeMap::new();
+        for card in self.0.iter() {
+            *counts.entry(*card).or_insert(0) += 1;
         }
-        let mut counts = counts;
-        counts.sort();
-        counts.reverse();
-        let mut category = Category::HighCard;
-        if counts[0] == 5 {
-            category = Category::FiveOfAKind;
-        } else if counts[0] == 4 {
-            category = Category::FourOfAKind;
-        } else if counts[0] == 3 && counts[1] == 2 {
-            category = Category::FullHouse;
-        } else if counts[0] == 3 {
-            category = Category::ThreeOfAKind;
-        } else if counts[0] == 2 && counts[1] == 2 {
-            category = Category::TwoPair;
-        } else if counts[0] == 2 {
-            category = Category::OnePair;
+        let mut freqs = counts.values().collect_vec();
+        freqs.sort();
+        match *freqs {
+            [1, 1, 1, 1, 1] => Category::HighCard,
+            [1, 1, 1, 2] => Category::OnePair,
+            [1, 2, 2] => Category::TwoPair,
+            [1, 1, 3] => Category::ThreeOfAKind,
+            [2, 3] => Category::FullHouse,
+            [1, 4] => Category::FourOfAKind,
+            [5] => Category::FiveOfAKind,
+            _ => panic!("Invalid hand: {:?}", self),
         }
-        return category;
-    }
-}
-
-impl PartialOrd for Hand {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        let category = self.category();
-        let other_category = other.category();
-        if category == other_category {
-            for i in (0..5).rev() {
-                let first = self.0[i];
-                let second = other.0[i];
-                if first != second {
-                    return second.partial_cmp(&first);
-                }
-            }
-        }
-        return category.partial_cmp(&other_category);
-    }
-}
-
-impl PartialEq for Hand {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
     }
 }
 
 pub fn solve_part_one(input: &str) -> u32 {
     let mut hands = input.lines().map(|line| parse_line(line)).collect_vec();
-    hands.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    hands.sort_by(|a, b| {
+        let category = a.0.category();
+        let other_category = b.0.category();
+        let (cat, num) = (category, a.0 .0.clone());
+        let (other_cat, other_num) = (other_category, b.0 .0.clone());
+        return (cat, num).partial_cmp(&(other_cat, other_num)).unwrap();
+    });
     let mut score = 0;
-    for (i, hand) in hands.iter().rev().enumerate() {
-        println!("{}: {:?}", i + 1, hand);
+    for (i, hand) in hands.iter().enumerate() {
+        println!("{}: {}:{}", i + 1, hand.0, hand.1);
         score += (i + 1) as u32 * hand.1 as u32;
     }
     return score;
@@ -120,7 +113,7 @@ mod tests {
     #[test]
     fn solves_7_1_hard() {
         let input = std::fs::read_to_string("input/7_real.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 42);
+        assert_eq!(super::solve_part_one(&input), 251136060);
     }
 
     #[test]

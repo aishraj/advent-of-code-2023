@@ -1,5 +1,4 @@
-use core::num;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use itertools::Itertools;
 
@@ -8,9 +7,9 @@ pub fn solve_part_one(input: &str) -> u32 {
     return simulate(&seed, memory).try_into().unwrap();
 }
 
-pub fn solve_part_two(input: &str) -> u32 {
+pub fn solve_part_two(input: &str) -> u64 {
     let (seed, memory) = parse_input(input);
-    return simulate_two(&seed, memory).try_into().unwrap();
+    return simulate_two(&seed, memory);
 }
 
 fn parse_input(input: &str) -> (String, BTreeMap<String, (String, String)>) {
@@ -28,7 +27,7 @@ fn parse_input(input: &str) -> (String, BTreeMap<String, (String, String)>) {
     return (seed.trim().to_string(), mapping);
 }
 
-fn simulate(instructions: &str, memory: BTreeMap<String, (String, String)>) -> usize {
+fn simulate(instructions: &str, memory: BTreeMap<String, (String, String)>) -> u64 {
     let mut current_pos = 0;
     let mut acc = 0;
     let instructions: Vec<String> = instructions.chars().map(|c| c.to_string()).collect();
@@ -49,35 +48,39 @@ fn simulate(instructions: &str, memory: BTreeMap<String, (String, String)>) -> u
     return acc;
 }
 
-fn simulate_two(instructions: &str, memory: BTreeMap<String, (String, String)>) -> usize {
-    let mut cur_pos = 0;
-    let mut acc = 0;
+fn simulate_two(instructions: &str, memory: BTreeMap<String, (String, String)>) -> u64 {
     let instructions: Vec<String> = instructions.chars().map(|c| c.to_string()).collect();
     let num_instructions = instructions.len();
-    let mut current_nodes = memory
+    let current_nodes = memory
         .keys()
         .filter(|k| k.ends_with("A"))
         .map(|x| x.clone())
         .collect_vec();
-    let mut done = current_nodes.iter().all(|n| n.ends_with("Z"));
-    while !done {
-        let instruction = &instructions[cur_pos % num_instructions];
-        println!("{}: {}: {:?}", cur_pos, instruction, current_nodes);
-        let mut next_nodes = Vec::new();
-        for node in current_nodes.iter() {
+    let mut num_steps = vec![];
+    for node in current_nodes.iter() {
+        let mut current_pos = 0;
+        let mut current_node = node.clone();
+        let mut acc = 0;
+        while !current_node.ends_with("Z") {
+            let instruction = &instructions[current_pos % num_instructions];
+            println!("{}: {}: {}", current_pos, instruction, current_node);
             let next_node = if instruction == "L" {
-                memory.get(node).unwrap().0.clone()
+                memory.get(&current_node).unwrap().0.clone()
             } else {
-                memory.get(node).unwrap().1.clone()
+                memory.get(&current_node).unwrap().1.clone()
             };
-            next_nodes.push(next_node.clone());
+            current_node = next_node;
+            current_pos += 1;
+            acc += 1;
         }
-        done = current_nodes.iter().all(|n| n.ends_with("Z"));
-        current_nodes = next_nodes;
-        cur_pos += 1;
-        acc += 1;
+        num_steps.push(acc);
     }
-    return acc - 1;
+    // compute the lcm of the numbers in num_steps
+    let mut lcm = num_steps[0];
+    for i in 1..num_steps.len() {
+        lcm = num::integer::lcm(lcm, num_steps[i]);
+    }
+    return lcm;
 }
 
 #[cfg(test)]
@@ -109,6 +112,6 @@ mod tests {
     #[test]
     fn solves_8_2_hard() {
         let input = std::fs::read_to_string("input/8_real.txt").unwrap();
-        assert_eq!(super::solve_part_two(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 14616363770447);
     }
 }

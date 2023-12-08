@@ -1,3 +1,4 @@
+pub mod dayeight;
 pub mod dayfive;
 pub mod dayfour;
 pub mod dayone;

@@ -9,7 +9,8 @@ pub fn solve_part_one(input: &str) -> u32 {
 }
 
 pub fn solve_part_two(input: &str) -> u32 {
-    42
+    let (seed, memory) = parse_input(input);
+    return simulate_two(&seed, memory).try_into().unwrap();
 }
 
 fn parse_input(input: &str) -> (String, BTreeMap<String, (String, String)>) {
@@ -48,6 +49,37 @@ fn simulate(instructions: &str, memory: BTreeMap<String, (String, String)>) -> u
     return acc;
 }
 
+fn simulate_two(instructions: &str, memory: BTreeMap<String, (String, String)>) -> usize {
+    let mut cur_pos = 0;
+    let mut acc = 0;
+    let instructions: Vec<String> = instructions.chars().map(|c| c.to_string()).collect();
+    let num_instructions = instructions.len();
+    let mut current_nodes = memory
+        .keys()
+        .filter(|k| k.ends_with("A"))
+        .map(|x| x.clone())
+        .collect_vec();
+    let mut done = current_nodes.iter().all(|n| n.ends_with("Z"));
+    while !done {
+        let instruction = &instructions[cur_pos % num_instructions];
+        println!("{}: {}: {:?}", cur_pos, instruction, current_nodes);
+        let mut next_nodes = Vec::new();
+        for node in current_nodes.iter() {
+            let next_node = if instruction == "L" {
+                memory.get(node).unwrap().0.clone()
+            } else {
+                memory.get(node).unwrap().1.clone()
+            };
+            next_nodes.push(next_node.clone());
+        }
+        done = current_nodes.iter().all(|n| n.ends_with("Z"));
+        current_nodes = next_nodes;
+        cur_pos += 1;
+        acc += 1;
+    }
+    return acc - 1;
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -70,8 +102,8 @@ mod tests {
 
     #[test]
     fn solves_8_2_easy() {
-        let input = std::fs::read_to_string("input/8_easy.txt").unwrap();
-        assert_eq!(super::solve_part_two(&input), 42);
+        let input = std::fs::read_to_string("input/8_easy2.txt").unwrap();
+        assert_eq!(super::solve_part_two(&input), 6);
     }
 
     #[test]

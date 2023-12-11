@@ -49,17 +49,14 @@ fn expand(grid: &mut Vec<Vec<char>>, galaxies: &mut Vec<(usize, usize)>, expansi
         }
     }
 
-    no_galaxy_row.reverse();
-    no_galaxy_col.reverse();
-
-    for r in no_galaxy_row {
+    for r in no_galaxy_row.into_iter().rev() {
         for g in &mut *galaxies {
             if g.0 > r {
                 g.0 += expansion - 1
             }
         }
     }
-    for c in no_galaxy_col {
+    for c in no_galaxy_col.into_iter().rev() {
         for g in &mut *galaxies {
             if g.1 > c {
                 g.1 += expansion - 1

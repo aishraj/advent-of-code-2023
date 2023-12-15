@@ -1,3 +1,5 @@
+use crate::utils::transpose;
+
 pub fn solve_part_one(input: &str) -> u64 {
     input
         .split("\n\n")
@@ -46,18 +48,6 @@ fn reflect(pattern: Vec<Vec<char>>, wiggle_room: usize) -> Option<usize> {
             .sum::<usize>();
         c == wiggle_room
     })
-}
-
-fn transpose<T: Clone>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
-    let mut result = Vec::new();
-    for i in 0..v[0].len() {
-        let mut row = Vec::new();
-        for j in 0..v.len() {
-            row.push(v[j][i].clone());
-        }
-        result.push(row);
-    }
-    result
 }
 
 #[cfg(test)]

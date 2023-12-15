@@ -24,7 +24,7 @@ pub fn solve_part_one(input: &str) -> u64 {
             })
             .collect_vec();
     }
-    state.iter().min().unwrap().clone()
+    *state.iter().min().unwrap()
 }
 
 pub fn solve_part_two(input: &str) -> u64 {
@@ -99,7 +99,7 @@ fn parse_block(input: Vec<&str>) -> Vec<(std::ops::Range<u64>, std::ops::Range<u
     let input = input[1..].to_vec();
     let mut ranges = Vec::new();
     for line in input {
-        let line = line.trim().split_whitespace().collect_vec();
+        let line = line.split_whitespace().collect_vec();
         //println!("Parsing line: {:?}", line);
         let destination_start = line[0].parse::<u64>().unwrap();
         let source_start = line[1].parse::<u64>().unwrap();
@@ -120,14 +120,14 @@ fn parse_input(
 ) {
     let groups = input.split("\n\n").collect::<Vec<_>>();
     //seeds: 79 14 55 13
-    let initial_state = groups[0].split(":").collect::<Vec<_>>()[1];
+    let initial_state = groups[0].split(':').collect::<Vec<_>>()[1];
     let initial_state = initial_state
         .split_whitespace()
         .map(|x| x.parse::<u64>().unwrap())
         .collect::<Vec<_>>();
     let mut blocks = Vec::new();
     for block in groups[1..].to_vec() {
-        blocks.push(parse_block(block.split("\n").collect::<Vec<_>>()));
+        blocks.push(parse_block(block.split('\n').collect::<Vec<_>>()));
     }
     (initial_state, blocks)
 }

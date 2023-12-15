@@ -4,12 +4,12 @@ use itertools::Itertools;
 
 pub fn solve_part_one(input: &str) -> u32 {
     let (seed, memory) = parse_input(input);
-    return simulate(&seed, memory).try_into().unwrap();
+    simulate(&seed, memory).try_into().unwrap()
 }
 
 pub fn solve_part_two(input: &str) -> u64 {
     let (seed, memory) = parse_input(input);
-    return simulate_two(&seed, memory);
+    simulate_two(&seed, memory)
 }
 
 fn parse_input(input: &str) -> (String, BTreeMap<String, (String, String)>) {
@@ -18,7 +18,7 @@ fn parse_input(input: &str) -> (String, BTreeMap<String, (String, String)>) {
     for line in lines.lines() {
         let (key, value) = line.split(" = ").collect_tuple().unwrap();
         let key = key.trim();
-        let value_parts: (&str, &str) = value.split(",").collect_tuple().unwrap();
+        let value_parts: (&str, &str) = value.split(',').collect_tuple().unwrap();
         let left = value_parts.0.trim()[1..].to_string();
         let right_raw = value_parts.1.trim();
         let right = right_raw[..right_raw.len() - 1].to_string();
@@ -33,7 +33,7 @@ fn simulate(instructions: &str, memory: BTreeMap<String, (String, String)>) -> u
     let instructions: Vec<String> = instructions.chars().map(|c| c.to_string()).collect();
     let num_instructions = instructions.len();
     let mut current_node = "AAA".to_string();
-    while current_node != "ZZZ".to_string() {
+    while current_node != *"ZZZ" {
         let instruction = &instructions[current_pos % num_instructions];
         println!("{}: {}: {}", current_pos, instruction, current_node);
         let next_node = if instruction == "L" {
@@ -45,7 +45,7 @@ fn simulate(instructions: &str, memory: BTreeMap<String, (String, String)>) -> u
         current_pos += 1;
         acc += 1;
     }
-    return acc;
+    acc
 }
 
 fn simulate_two(instructions: &str, memory: BTreeMap<String, (String, String)>) -> u64 {
@@ -53,15 +53,14 @@ fn simulate_two(instructions: &str, memory: BTreeMap<String, (String, String)>) 
     let num_instructions = instructions.len();
     let current_nodes = memory
         .keys()
-        .filter(|k| k.ends_with("A"))
-        .map(|x| x.clone())
+        .filter(|k| k.ends_with('A')).cloned()
         .collect_vec();
     let mut num_steps = vec![];
     for node in current_nodes.iter() {
         let mut current_pos = 0;
         let mut current_node = node.clone();
         let mut acc = 0;
-        while !current_node.ends_with("Z") {
+        while !current_node.ends_with('Z') {
             let instruction = &instructions[current_pos % num_instructions];
             println!("{}: {}: {}", current_pos, instruction, current_node);
             let next_node = if instruction == "L" {
@@ -80,7 +79,7 @@ fn simulate_two(instructions: &str, memory: BTreeMap<String, (String, String)>) 
     for i in 1..num_steps.len() {
         lcm = num::integer::lcm(lcm, num_steps[i]);
     }
-    return lcm;
+    lcm
 }
 
 #[cfg(test)]

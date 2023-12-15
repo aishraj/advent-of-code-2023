@@ -19,7 +19,7 @@ pub fn solve_part_one(input: &str) -> usize {
         println!("Row {} has {} stones", i, num_stones);
         c += (num_lines - i) * num_stones;
     }
-    return c;
+    c
 }
 
 fn move_rocks(transposed_input: Vec<Vec<char>>) -> Vec<Vec<char>> {
@@ -28,7 +28,7 @@ fn move_rocks(transposed_input: Vec<Vec<char>>) -> Vec<Vec<char>> {
         let slided_line = slide_stone(line);
         result.push(slided_line);
     }
-    return result;
+    result
 }
 
 pub fn solve_part_two(input: &str, times: usize) -> usize {
@@ -49,7 +49,7 @@ pub fn solve_part_two(input: &str, times: usize) -> usize {
     }
     let load = compute_load(input);
     println!("Load: {}", load);
-    return load;
+    load
 }
 
 fn compute_load(grid: Vec<Vec<char>>) -> usize {
@@ -60,7 +60,7 @@ fn compute_load(grid: Vec<Vec<char>>) -> usize {
         //println!("Row {} has {} stones", i, num_stones);
         c += (num_lines - i) * num_stones;
     }
-    return c;
+    c
 }
 
 pub fn solve_cycle_once(input: Vec<Vec<char>>) -> Vec<Vec<char>> {
@@ -96,7 +96,7 @@ pub fn solve_cycle_once(input: Vec<Vec<char>>) -> Vec<Vec<char>> {
         //println!("At the end of cycle {} the grid is:", i,);
         //pretty_print_grid(input.clone());
     }
-    return input;
+    input
 }
 
 /// This function slides all stone "O" to the left or to the closest # on the right.

@@ -42,7 +42,7 @@ fn parse_part_one(
             mapping.insert(pair.0, pair.1);
         }
     }
-    return (start, mapping, raw_input);
+    (start, mapping, raw_input)
 }
 
 // Assign the start pipe one of the four directions.
@@ -112,7 +112,7 @@ pub fn solve_part_one(input: &str) -> u32 {
     loop {
         let destination = *dirs
             .iter()
-            .filter(|d| *d != &last_direction && mapping.get(&(curx, cury)).unwrap().contains(&d))
+            .filter(|d| *d != &last_direction && mapping.get(&(curx, cury)).unwrap().contains(d))
             .collect_vec()
             .first()
             .expect("There should be at least one direction to go in");
@@ -136,7 +136,7 @@ pub fn solve_part_one(input: &str) -> u32 {
         };
     }
     //println!("{:?}", path);
-    return path.len() as u32 / 2;
+    path.len() as u32 / 2
 }
 
 pub fn solve_part_two(_input: &str) -> u32 {

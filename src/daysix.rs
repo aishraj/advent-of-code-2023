@@ -16,7 +16,7 @@ pub fn solve_part_one(input: &str) -> u64 {
         //println!("numbers: {:?}", numbers);
         prod *= numbers;
     }
-    return prod;
+    prod
 }
 
 pub fn solve_part_two(input: &str) -> u64 {
@@ -35,7 +35,7 @@ pub fn solve_part_two(input: &str) -> u64 {
     }
     //println!("numbers: {:?}", numbers);
     prod *= numbers;
-    return prod;
+    prod
 }
 
 fn parse_input(input: &str) -> (Vec<u64>, Vec<u64>) {
@@ -49,7 +49,7 @@ fn parse_input(input: &str) -> (Vec<u64>, Vec<u64>) {
         .split_whitespace()
         .map(|x| x.parse().unwrap())
         .collect();
-    return (times, dist);
+    (times, dist)
 }
 
 #[cfg(test)]

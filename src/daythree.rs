@@ -17,23 +17,21 @@ impl FromStr for Graph {
             }
             graph.push(row);
         }
-        return Ok(Graph(graph));
+        Ok(Graph(graph))
     }
 }
 
 impl Graph {
     /// Returns "numbers" that are connected to the given position
     pub fn search_numbers_from_position(&self, start: (usize, usize)) -> Vec<u32> {
-        let directions = vec![
-            (0, 1),
+        let directions = [(0, 1),
             (0, -1),
             (1, 0),
             (-1, 0),
             (1, 1),
             (-1, -1),
             (1, -1),
-            (-1, 1),
-        ];
+            (-1, 1)];
         let mut queue = VecDeque::new();
         let mut visited = HashSet::new();
         let mut numbers = vec![];
@@ -74,7 +72,7 @@ impl Graph {
                 numbers.push(current_number.parse::<u32>().unwrap());
             }
         }
-        return numbers;
+        numbers
     }
 
     fn get_symbol_pos(&self, symbol: char) -> Vec<(usize, usize)> {
@@ -87,7 +85,7 @@ impl Graph {
             }
         }
         println!("the symbol {} is at {:?}", symbol, result);
-        return result;
+        result
     }
 
     pub fn search(&self) -> Vec<u32> {
@@ -107,7 +105,7 @@ impl Graph {
             let found_numbers = self.search_numbers_from_position(symbol_pos);
             connected_numbers.extend(found_numbers);
         }
-        return connected_numbers;
+        connected_numbers
     }
 }
 
@@ -129,10 +127,10 @@ pub fn solve_part_two(input: &str) -> u32 {
         if numbers.len() < 2 {
             continue;
         }
-        let prod = numbers.iter().fold(1, |acc, x| acc * x);
-        sum = sum + prod;
+        let prod = numbers.iter().product::<u32>();
+        sum += prod;
     }
-    return sum;
+    sum
 }
 
 #[cfg(test)]

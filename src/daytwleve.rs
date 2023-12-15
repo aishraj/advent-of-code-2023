@@ -9,7 +9,7 @@ pub fn solve_part_one(input: &str) -> u64 {
     for (spring, groups) in input {
         res += recur(0, 0, spring, groups);
     }
-    return res as u64;
+    res as u64
 }
 
 pub fn solve_part_two(input: &str) -> u64 {
@@ -20,7 +20,7 @@ pub fn solve_part_two(input: &str) -> u64 {
         let unfolded_group = unfold_group(group.clone());
         res += recur(0, 0, unfolded_spring, unfolded_group);
     }
-    return res as u64;
+    res as u64
 }
 
 fn unfold_spring(spring: String) -> String {
@@ -40,11 +40,11 @@ fn unfold_group(group: Vec<usize>) -> Vec<usize> {
     for _ in 0..5 {
         res.extend(group.clone().iter());
     }
-    return res;
+    res
 }
 
 fn parse_input(input: &str) -> Vec<(String, Vec<usize>)> {
-    input.lines().map(|x| parse_input_line(x)).collect()
+    input.lines().map(parse_input_line).collect()
 }
 
 #[memoize]
@@ -87,7 +87,7 @@ fn recur(i: usize, j: usize, all_springs: String, group_sizes: Vec<usize>) -> i6
                 res += recur(i + count, j + 1, rec.iter().collect(), group_sizes.to_vec());
             }
         }
-        return res;
+        res
     }
 }
 
@@ -97,7 +97,7 @@ fn parse_input_line(line: &str) -> (String, Vec<usize>) {
         .split(',')
         .map(|x| x.parse::<usize>().unwrap())
         .collect();
-    return (firsthalf.to_string(), secondhalf);
+    (firsthalf.to_string(), secondhalf)
 }
 
 #[cfg(test)]

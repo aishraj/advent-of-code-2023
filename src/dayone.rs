@@ -7,12 +7,12 @@ pub fn solve_part_one(input: &str) -> u32 {
         .map(|line| {
             let digits: Vec<_> = line
                 .chars()
-                .filter(|c| c.is_digit(10))
+                .filter(|c| c.is_ascii_digit())
                 .map(|c| c.to_digit(10).unwrap())
                 .collect();
             println!("Digits is {:?}", digits);
             let product = (digits.first().unwrap() * 10) + digits.last().unwrap();
-            return product;
+            product
         })
         .sum()
 }
@@ -28,9 +28,7 @@ fn find_all(input: &str, substring: &str) -> Vec<usize> {
 }
 
 pub fn solve_part_two(input: &str) -> u32 {
-    let words = vec![
-        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    ];
+    let words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
     input
         .trim()
         .par_lines()
@@ -44,7 +42,7 @@ pub fn solve_part_two(input: &str) -> u32 {
             let digits_pos: Vec<_> = line
                 .chars()
                 .enumerate()
-                .filter(|(_pos, c)| c.is_digit(10))
+                .filter(|(_pos, c)| c.is_ascii_digit())
                 .map(|(pos, c)| (c.to_digit(10).unwrap(), pos))
                 .collect();
             digit_pos_pairs.extend(digits_pos);
@@ -55,7 +53,7 @@ pub fn solve_part_two(input: &str) -> u32 {
         .map(|pairs| {
             let numbers: Vec<_> = pairs.iter().map(|p| p.0).collect();
             let product = (numbers.first().unwrap() * 10) + numbers.last().unwrap();
-            return product;
+            product
         })
         .sum()
 }

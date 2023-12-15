@@ -68,7 +68,7 @@ pub fn solve_part_two(input: &str) -> u32 {
         // );
     }
     println!("final card counts: {:?}", card_counts);
-    card_counts.iter().map(|(_k, v)| v).sum()
+    card_counts.values().sum()
 }
 
 fn parse_input(input: &str) -> Vec<Vec<Vec<u32>>> {
@@ -76,8 +76,8 @@ fn parse_input(input: &str) -> Vec<Vec<Vec<u32>>> {
         .lines()
         .map(|line| {
             // each line looks like Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
-            let (_id, cards) = line.split(":").collect_tuple().unwrap();
-            let numbers = cards.split("|").collect_vec();
+            let (_id, cards) = line.split(':').collect_tuple().unwrap();
+            let numbers = cards.split('|').collect_vec();
             numbers
                 .iter()
                 .map(|card| card.split_whitespace().collect_vec())

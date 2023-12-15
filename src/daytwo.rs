@@ -17,35 +17,35 @@ mod parser {
             .trim()
             .lines()
             .map(|line| line.trim())
-            .map(|line| parse_line(line))
+            .map(parse_line)
             .collect_vec()
     }
 
     pub fn parse_line(line: &str) -> Vec<Vec<Cube>> {
-        line.split(";")
-            .map(|inner| parse_inner(inner))
+        line.split(';')
+            .map(parse_inner)
             .collect_vec()
     }
 
     pub fn parse_inner(mut section: &str) -> Vec<Cube> {
-        if section.contains(":") {
-            section = section.split(":").collect_vec()[1];
+        if section.contains(':') {
+            section = section.split(':').collect_vec()[1];
         }
         section = section.trim();
         let items = section
-            .split(",")
+            .split(',')
             .map(|item| {
                 let (count, color) = item.split_whitespace().collect_tuple().unwrap();
                 let count: usize = count.parse().unwrap();
-                return match color {
+                match color {
                     "red" => Cube::Red(count),
                     "blue" => Cube::Blue(count),
                     "green" => Cube::Green(count),
                     _ => panic!("Invalid cube color"),
-                };
+                }
             })
             .collect_vec();
-        return items;
+        items
     }
 }
 
@@ -59,7 +59,7 @@ pub fn solve_part_one(input: &str, rgb_limits: (u32, u32, u32)) -> u32 {
     }
     println!("Possible games: {:?}", possible_games);
     let total = possible_games.iter().map(|item| *item as u32).sum();
-    return total;
+    total
 }
 
 fn is_line_possible(parsed_line: &Vec<Vec<Cube>>, limits: (u32, u32, u32)) -> bool {
@@ -85,20 +85,20 @@ fn is_line_possible(parsed_line: &Vec<Vec<Cube>>, limits: (u32, u32, u32)) -> bo
             }
         }
     }
-    return true;
+    true
 }
 
 pub fn solve_part_two(input: &str) -> u32 {
     let parsed = parse_input(input);
     parsed
         .iter()
-        .map(|line| get_power_from_line(line))
+        .map(get_power_from_line)
         .sum::<u32>()
 }
 
 fn get_power_from_line(parsed_line: &Vec<Vec<Cube>>) -> u32 {
     let (red, green, blue) = max_by_color(parsed_line);
-    return (red * green * blue) as u32;
+    (red * green * blue) as u32
 }
 
 fn max_by_color(parsed_line: &Vec<Vec<Cube>>) -> (usize, usize, usize) {
@@ -124,7 +124,7 @@ fn max_by_color(parsed_line: &Vec<Vec<Cube>>) -> (usize, usize, usize) {
             }
         }
     }
-    return (red, green, blue);
+    (red, green, blue)
 }
 
 #[cfg(test)]

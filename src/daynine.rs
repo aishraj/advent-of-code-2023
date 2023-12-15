@@ -2,7 +2,7 @@ pub fn solve_part_one(input: &str) -> i32 {
     let parsed_input = parse(input);
     let extrapolated = parsed_input
         .iter()
-        .map(|numbers| extrapolate(numbers))
+        .map(extrapolate)
         .collect::<Vec<_>>();
     extrapolated.iter().sum()
 }

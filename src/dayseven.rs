@@ -77,7 +77,7 @@ impl Hand {
                     }
                 });
 
-        let mut freqs = counts.values().map(|x| *x).collect_vec();
+        let mut freqs = counts.values().copied().collect_vec();
         freqs.sort();
         if let Some(last_item) = freqs.last_mut() {
             *last_item += num_jokers;
@@ -108,14 +108,14 @@ pub fn solve(input: &str, part_two: bool) -> u32 {
         let other_category = b.0.category(part_two);
         let (cat, num) = (category, a.0 .0.clone());
         let (other_cat, other_num) = (other_category, b.0 .0.clone());
-        return (cat, num).partial_cmp(&(other_cat, other_num)).unwrap();
+        (cat, num).partial_cmp(&(other_cat, other_num)).unwrap()
     });
     let mut score = 0;
     for (i, hand) in hands.iter().enumerate() {
         println!("{}: {}:{}", i + 1, hand.0, hand.1);
         score += (i + 1) as u32 * hand.1 as u32;
     }
-    return score;
+    score
 }
 
 pub fn solve_part_one(input: &str) -> u32 {

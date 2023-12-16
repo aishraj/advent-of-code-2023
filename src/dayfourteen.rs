@@ -121,15 +121,6 @@ fn slide_stone(input: Vec<char>) -> Vec<char> {
     return result[1..].iter().copied().collect_vec();
 }
 
-fn pretty_print_grid(grid: Vec<Vec<char>>) {
-    let mut result = String::new();
-    for line in grid {
-        let line: String = line.iter().collect();
-        result.push_str(&format!("{}\n", line));
-    }
-    println!("{}", result);
-}
-
 fn parse_input(input: &str) -> Vec<Vec<char>> {
     input
         .lines()

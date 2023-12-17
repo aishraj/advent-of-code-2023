@@ -96,25 +96,25 @@ mod tests {
     use super::*;
 
     #[test]
-    fn solves_17_1_easy() {
+    fn solves_16_1_easy() {
         let input = std::fs::read_to_string("input/16_easy.txt").unwrap();
         assert_eq!(solve_part_one(&input), 46);
     }
 
     #[test]
-    fn solves_17_2_easy() {
+    fn solves_16_2_easy() {
         let input = std::fs::read_to_string("input/16_easy.txt").unwrap();
         assert_eq!(solve_part_two(&input), 51);
     }
 
     #[test]
-    fn solves_17_2_real() {
+    fn solves_16_2_real() {
         let input = std::fs::read_to_string("input/16_real.txt").unwrap();
         assert_eq!(solve_part_two(&input), 8183);
     }
 
     #[test]
-    fn solves_17_1_real() {
+    fn solves_16_1_real() {
         let input = std::fs::read_to_string("input/16_real.txt").unwrap();
         assert_eq!(solve_part_one(&input), 7434);
     }

@@ -8,8 +8,10 @@ pub fn solve_part_one(input: &str) -> usize {
     result.unwrap()
 }
 
-pub fn solve_part_two(input: &str) -> u32 {
-    42
+pub fn solve_part_two(input: &str) -> usize {
+    let grid = parse_input(input);
+    let result = dijkstras_with_step_bound(&grid, 4, 10);
+    result.unwrap()
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -139,12 +141,12 @@ mod tests {
     #[test]
     fn solves_17_2_easy() {
         let input = std::fs::read_to_string("input/17_easy.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 42);
     }
 
     #[test]
     fn solves_17_2_hard() {
         let input = std::fs::read_to_string("input/17_real.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 42);
     }
 }

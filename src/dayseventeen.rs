@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::{collections::BTreeSet, path};
 
 use itertools::Itertools;
 
@@ -72,13 +72,16 @@ fn dijkstras_with_step_bound(
         steps,
     }) = queue.pop()
     {
-        if position == (grid.len() - 1, grid[0].len() - 1) {
+        if position == (grid.len() - 1, grid[0].len() - 1)
+            && steps >= min_steps
+            && steps <= max_steps
+        {
             return Some(cost);
         }
         if visited.contains(&(position, direction, steps)) {
             continue;
         }
-        visited.insert((position, direction, steps));
+
         for (_i, unit_vector) in direction_unit_vectors.iter().enumerate() {
             let new_direction = *unit_vector;
 
@@ -87,10 +90,22 @@ fn dijkstras_with_step_bound(
                 continue;
             }
 
+            // don't go in the same direction for too long
+            if new_direction == direction && steps >= max_steps {
+                continue;
+            }
+
+            // don't go in a new direction if we haven't gone far enough
+            if new_direction != direction && steps < min_steps {
+                continue;
+            }
+
+            // don't go out of bounds
             let new_position = (
                 position.0 as i32 + new_direction.0,
                 position.1 as i32 + new_direction.1,
             );
+
             if new_position.0 < 0
                 || new_position.1 < 0
                 || new_position.0 >= grid.len() as i32
@@ -98,6 +113,7 @@ fn dijkstras_with_step_bound(
             {
                 continue;
             }
+
             let new_position = (new_position.0 as usize, new_position.1 as usize);
             let new_cost = cost + grid[new_position.0][new_position.1];
             let new_steps = if new_direction == direction {
@@ -105,9 +121,10 @@ fn dijkstras_with_step_bound(
             } else {
                 1
             };
-            if new_steps >= min_steps && new_steps <= max_steps {
-                queue.push(State::new(new_cost, new_position, new_direction, new_steps));
-            }
+            // factor cost
+            queue.push(State::new(new_cost, new_position, new_direction, new_steps));
+
+            visited.insert((position, direction, steps));
         }
     }
     None
@@ -117,7 +134,8 @@ fn parse_input(input: &str) -> Vec<Vec<usize>> {
     input
         .lines()
         .map(|line| {
-            line.chars()
+            line.trim()
+                .chars()
                 .map(|c| c.to_digit(10).unwrap() as usize)
                 .collect_vec()
         })
@@ -135,13 +153,25 @@ mod tests {
     #[test]
     fn solves_17_1_hard() {
         let input = std::fs::read_to_string("input/17_real.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 42);
+        assert_eq!(super::solve_part_one(&input), 1065);
+    }
+
+    #[test]
+    fn solves_17_med() {
+        let inp = "111111111111
+        999999999991
+        999999999991
+        999999999991
+        999999999991";
+        let grid = super::parse_input(inp);
+        let result = super::dijkstras_with_step_bound(&grid, 4, 10);
+        assert_eq!(result, Some(71));
     }
 
     #[test]
     fn solves_17_2_easy() {
         let input = std::fs::read_to_string("input/17_easy.txt").unwrap();
-        assert_eq!(super::solve_part_two(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 94);
     }
 
     #[test]

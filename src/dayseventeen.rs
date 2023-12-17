@@ -35,11 +35,7 @@ impl State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        other
-            .cost
-            .cmp(&self.cost)
-            .then_with(|| self.position.cmp(&other.position))
-            .then_with(|| self.direction.cmp(&other.direction))
+        other.cost.cmp(&self.cost)
     }
 }
 
@@ -77,9 +73,6 @@ fn dijkstras_with_step_bound(
             && steps <= max_steps
         {
             return Some(cost);
-        }
-        if visited.contains(&(position, direction, steps)) {
-            continue;
         }
 
         for (_i, unit_vector) in direction_unit_vectors.iter().enumerate() {
@@ -122,9 +115,12 @@ fn dijkstras_with_step_bound(
                 1
             };
             // factor cost
-            queue.push(State::new(new_cost, new_position, new_direction, new_steps));
+            if visited.contains(&(new_position, new_direction, new_steps)) {
+                continue;
+            }
 
-            visited.insert((position, direction, steps));
+            visited.insert((new_position, new_direction, new_steps));
+            queue.push(State::new(new_cost, new_position, new_direction, new_steps));
         }
     }
     None

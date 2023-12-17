@@ -7,6 +7,7 @@ pub mod dayfourteen;
 pub mod daynine;
 pub mod dayone;
 pub mod dayseven;
+pub mod dayseventeen;
 pub mod daysix;
 pub mod daysixteen;
 pub mod dayten;

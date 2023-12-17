@@ -1,7 +1,6 @@
 use std::{
     cmp,
     collections::{HashSet, VecDeque},
-    hash,
 };
 
 use itertools::Itertools;

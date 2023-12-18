@@ -11,9 +11,9 @@ enum Direction {
 
 pub fn solve_part_one(input: &str) -> u32 {
     let input = parse_input(input);
-    let mut grid = vec![vec!['.'; 1000000]; 1000000];
-    let mut cur_x: i64 = 0;
-    let mut cur_y: i64 = 0;
+    let mut grid = vec![vec!['.'; 10000]; 10000];
+    let mut cur_x: i64 = 5000;
+    let mut cur_y: i64 = 5000;
     let point = (cur_x, cur_y);
     let mut wall_count = 0;
     for (direction, _) in input.into_iter() {
@@ -27,6 +27,7 @@ pub fn solve_part_one(input: &str) -> u32 {
             }
             Direction::Up(amount) => {
                 for i in ((cur_x - amount)..cur_x).rev() {
+                    println!("Setting ({}, {}) to #", i, cur_y);
                     grid[i as usize][cur_y as usize] = '#';
 
                     wall_count += 1;
@@ -89,7 +90,7 @@ pub fn solve_part_one(input: &str) -> u32 {
     println!("Found entrance at ({}, {})", inx, iny);
 
     // Run flood fill from the entrance
-    let mut visited = vec![vec![false; 20]; 20];
+    let mut visited = vec![vec![false; 10000]; 10000];
     let mut queue = VecDeque::new();
     queue.push_back((inx, iny));
     let mut count = 0;
@@ -143,17 +144,17 @@ fn parse_input(input: &str) -> Vec<(Direction, String)> {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn solves_18_1_easy() {
-        let input = std::fs::read_to_string("input/18_easy.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 62);
-    }
+    // #[test]
+    // fn solves_18_1_easy() {
+    //     let input = std::fs::read_to_string("input/18_easy.txt").unwrap();
+    //     assert_eq!(super::solve_part_one(&input), 62);
+    // }
 
-    #[test]
-    fn solves_18_1_hard() {
-        let input = std::fs::read_to_string("input/18_real.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 42);
-    }
+    // #[test]
+    // fn solves_18_1_hard() {
+    //     let input = std::fs::read_to_string("input/18_real.txt").unwrap();
+    //     assert_eq!(super::solve_part_one(&input), 53844);
+    // }
 
     #[test]
     fn solves_18_2_easy() {

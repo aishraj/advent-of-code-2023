@@ -115,8 +115,7 @@ pub fn solve_part_one(input: &str) -> u32 {
     }
     println!("Counted {} points", count);
     println!("Total count: {}", count + wall_count);
-
-    0
+    count + wall_count
 }
 
 pub fn solve_part_two(input: &str) -> u32 {
@@ -144,17 +143,11 @@ fn parse_input(input: &str) -> Vec<(Direction, String)> {
 
 #[cfg(test)]
 mod tests {
-    // #[test]
-    // fn solves_18_1_easy() {
-    //     let input = std::fs::read_to_string("input/18_easy.txt").unwrap();
-    //     assert_eq!(super::solve_part_one(&input), 62);
-    // }
-
-    // #[test]
-    // fn solves_18_1_hard() {
-    //     let input = std::fs::read_to_string("input/18_real.txt").unwrap();
-    //     assert_eq!(super::solve_part_one(&input), 53844);
-    // }
+    #[test]
+    fn solves_18_1_hard() {
+        let input = std::fs::read_to_string("input/18_real.txt").unwrap();
+        assert_eq!(super::solve_part_one(&input), 53844);
+    }
 
     #[test]
     fn solves_18_2_easy() {

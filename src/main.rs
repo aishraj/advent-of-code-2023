@@ -1,4 +1,7 @@
 use itertools::Itertools;
+use parser::{Instruction, Program, Terminal, Xmas};
+
+use crate::parser::End;
 
 pub mod parser {
     use itertools::Itertools;
@@ -21,26 +24,38 @@ pub mod parser {
 
     #[derive(Debug, Clone)]
     pub(crate) struct Comparison {
-        variable: String,
-        operator: char,
-        value: i32,
+        pub(crate) variable: String,
+        pub(crate) operator: char,
+        pub(crate) value: i32,
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, PartialEq)]
     pub(crate) enum Terminal {
         Goto(String),
         Stop(End),
     }
 
     #[derive(Debug, Clone)]
-    pub(crate) struct Xmas {
-        x: usize,
-        m: usize,
-        a: usize,
-        s: usize,
+    pub struct Xmas {
+        pub x: usize,
+        pub m: usize,
+        pub a: usize,
+        pub s: usize,
     }
 
-    #[derive(Debug, Clone)]
+    impl Xmas {
+        pub fn get(&self, value: &str) -> usize {
+            match value {
+                "x" => self.x,
+                "m" => self.m,
+                "a" => self.a,
+                "s" => self.s,
+                _ => unreachable!(),
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, PartialEq)]
     pub(crate) enum End {
         Accept,
         Reject,
@@ -48,8 +63,8 @@ pub mod parser {
 
     #[derive(Debug, Clone)]
     pub(crate) struct Program {
-        name: String,
-        instructions: Vec<Instruction>,
+        pub(crate) name: String,
+        pub(crate) instructions: Vec<Instruction>,
     }
 
     // a body is a comma separated list of instructions
@@ -161,6 +176,69 @@ pub mod parser {
     }
 }
 
+fn evaluate_program(program: &Vec<Program>, memory: Xmas) -> usize {
+    //convert the program to a hashmap
+    let program = program
+        .iter()
+        .map(|program| (program.name.clone(), program.clone()))
+        .collect::<std::collections::HashMap<String, Program>>();
+    let mut state = Terminal::Goto("in".to_string());
+
+    loop {
+        //println!("State is {:?}", state);
+        match state {
+            Terminal::Stop(End::Accept) => {
+                println!("Accepting program");
+                let sum = memory.x + memory.m + memory.a + memory.s;
+                return sum as usize;
+            }
+            Terminal::Stop(End::Reject) => {
+                return 0;
+            }
+            Terminal::Goto(ref label) => {
+                println!("Evaluating program {}", label);
+                let program = program.get(label).unwrap();
+                for instruction in program.instructions.iter() {
+                    //println!("Instruction is {:?}", instruction);
+                    match instruction {
+                        Instruction::Check((comparison, next_state)) => {
+                            let variable = comparison.variable.clone();
+                            let value = memory.get(&variable) as i64;
+                            let operator = comparison.operator;
+                            let comparison_value = comparison.value;
+                            let next_state = next_state.clone();
+                            if operator == '<' {
+                                if value < comparison_value.into() {
+                                    state = next_state;
+                                    break;
+                                } else {
+                                    continue;
+                                }
+                            } else if operator == '>' {
+                                if value > comparison_value.into() {
+                                    state = next_state;
+                                    break;
+                                } else {
+                                    continue;
+                                }
+                            }
+                        }
+                        Instruction::Terminal(terminal) => {
+                            state = terminal.clone();
+                        }
+                    };
+                }
+            }
+        }
+    }
+}
+
+// {x=787,m=2655,a=1222,s=2876}: in -> qqz -> qs -> lnx -> A
+// {x=1679,m=44,a=2067,s=496}: in -> px -> rfg -> gd -> R
+// {x=2036,m=264,a=79,s=2244}: in -> qqz -> hdj -> pv -> A
+// {x=2461,m=1339,a=466,s=291}: in -> px -> qkq -> crn -> R
+// {x=2127,m=1623,a=2188,s=1013}: in -> px -> rfg -> A
+
 fn main() {
     let input = std::fs::read_to_string("input/19_easy.txt").unwrap();
     let parts = input.split("\n\n").collect_vec();
@@ -182,8 +260,18 @@ fn main() {
                 .map(|(_, xmas)| xmas)
         })
         .collect_vec();
-    println!("{:?}", programs);
-    println!("{:?}", xmases);
+    // println!("{:?}", programs);
+    // println!("{:?}", xmases);
+
+    let total_result = xmases
+        .iter()
+        .map(|xmas| evaluate_program(&programs, xmas.clone()))
+        .sum::<usize>();
+    println!("The total result is {}", total_result);
+
+    // let first_result = evaluate_program(&programs, xmases[0].clone());
+    // println!("The first result is {}", first_result);
+
     // let lines = "px{a<2006:qkq,m>2090:A,rfg}
     // pv{a>1716:R,A}
     // lnx{m>1548:A,A}

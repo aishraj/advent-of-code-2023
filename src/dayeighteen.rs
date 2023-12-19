@@ -1,7 +1,8 @@
-use std::collections::VecDeque;
+use std::collections::{BTreeSet, VecDeque};
 
 use itertools::Itertools;
 
+#[derive(Debug, Clone)]
 enum Direction {
     Left(i64),
     Right(i64),
@@ -9,117 +10,75 @@ enum Direction {
     Down(i64),
 }
 
-pub fn solve_part_one(input: &str) -> u32 {
-    let input = parse_input(input);
-    let mut grid = vec![vec!['.'; 10000]; 10000];
-    let mut cur_x: i64 = 5000;
-    let mut cur_y: i64 = 5000;
-    let point = (cur_x, cur_y);
-    let mut wall_count = 0;
-    for (direction, _) in input.into_iter() {
-        match direction {
-            Direction::Down(amount) => {
-                for i in (cur_x + 1)..=(cur_x + amount) {
-                    grid[i as usize][cur_y as usize] = '#';
-                    wall_count += 1;
-                }
-                cur_x += amount;
-            }
-            Direction::Up(amount) => {
-                for i in ((cur_x - amount)..cur_x).rev() {
-                    println!("Setting ({}, {}) to #", i, cur_y);
-                    grid[i as usize][cur_y as usize] = '#';
-
-                    wall_count += 1;
-                }
-                cur_x -= amount;
-            }
-            Direction::Left(amount) => {
-                for i in (((cur_y as i64 - amount) as usize)..cur_y as usize).rev() {
-                    grid[cur_x as usize][i as usize] = '#';
-                    wall_count += 1;
-                }
-                cur_y -= amount;
-            }
-            Direction::Right(amount) => {
-                for i in (cur_y + 1)..=(cur_y + amount) {
-                    grid[cur_x as usize][i as usize] = '#';
-                    wall_count += 1;
-                }
-                cur_y += amount;
-            }
-        }
+fn shoelace(vertices: &Vec<(i64, i64)>) -> f64 {
+    let mut sum = 0.0;
+    let x = vertices.iter().map(|(x, _)| *x).collect_vec();
+    let y = vertices.iter().map(|(_, y)| *y).collect_vec();
+    for i in 0..x.len() {
+        let next_index = (i + 1) % x.len();
+        sum += (x[i] * y[next_index]) as f64 - (x[next_index] * y[i]) as f64;
     }
-    // Print the grid
-    for line in &grid {
-        for c in line {
-            print!("{}", c);
-        }
-        println!();
-    }
-    println!("Wall count: {}", wall_count);
-
-    // from curx, cury look for a point that is not a wall
-    // check all 8 directions
-    let directions: Vec<(i64, i64)> = vec![
-        (0, 1),
-        (1, 0),
-        (-1, 0),
-        (0, -1),
-        (1, 1),
-        (-1, -1),
-        (1, -1),
-        (-1, 1),
-    ];
-    let m = grid.len();
-    let n = grid[0].len();
-
-    let (mut inx, mut iny) = (cur_x, cur_y);
-    for direction in directions {
-        let (nx, ny) = ((cur_x as i64 + direction.0), (cur_y as i64 + direction.1));
-        if nx < 0 || ny < 0 || nx >= m as i64 || ny >= n as i64 {
-            continue;
-        }
-        if grid[nx as usize][ny as usize] == '#' {
-            continue;
-        }
-        inx = nx as i64;
-        iny = ny as i64;
-        break;
-    }
-    println!("Found entrance at ({}, {})", inx, iny);
-
-    // Run flood fill from the entrance
-    let mut visited = vec![vec![false; 10000]; 10000];
-    let mut queue = VecDeque::new();
-    queue.push_back((inx, iny));
-    let mut count = 0;
-    while !queue.is_empty() {
-        let (x, y) = queue.pop_front().unwrap();
-        if visited[x as usize][y as usize] {
-            continue;
-        }
-        visited[x as usize][y as usize] = true;
-        count += 1;
-        let directions = vec![(0, 1), (1, 0), (0, -1), (-1, 0)];
-        for direction in directions {
-            let (nx, ny) = ((x as i64 + direction.0), (y as i64 + direction.1));
-            if nx < 0 || ny < 0 || nx >= m as i64 || ny >= n as i64 {
-                continue;
-            }
-            if grid[nx as usize][ny as usize] == '#' {
-                continue;
-            }
-            queue.push_back((nx, ny));
-        }
-    }
-    println!("Counted {} points", count);
-    println!("Total count: {}", count + wall_count);
-    count + wall_count
+    (sum / 2.0).abs()
 }
 
-pub fn solve_part_two(input: &str) -> u32 {
-    42
+fn picks(a: f64, b: usize) -> f64 {
+    a + 1.0 - (b as f64) / 2.0
+}
+
+pub fn solve_part_one(input: &str) -> i64 {
+    let input = parse_input(input);
+    let directions = input.iter().map(|(dir, _)| dir.clone()).collect_vec();
+    solve_inner(directions)
+}
+
+fn solve_inner(dirs: Vec<Direction>) -> i64 {
+    let mut point = (0, 0);
+    let mut points = BTreeSet::new();
+    let mut locations = vec![];
+    for direction in dirs.into_iter() {
+        let (dir, amt) = match direction {
+            Direction::Down(amount) => ((-1, 0), amount),
+            Direction::Up(amount) => ((1, 0), amount),
+            Direction::Left(amount) => ((0, -1), amount),
+            Direction::Right(amount) => ((0, 1), amount),
+        };
+        for i in 0..=amt {
+            let next_point = (point.0 + i * dir.0, point.1 + i * dir.1);
+            points.insert(next_point);
+        }
+        // translate the point by the magnitude and direction
+        point = (point.0 + amt * dir.0, point.1 + amt * dir.1);
+        locations.push(point);
+    }
+    let area = shoelace(&locations);
+    let b = points.len();
+    let i = picks(area, b);
+    (i + (b as f64)) as i64
+}
+
+pub fn solve_part_two(input: &str) -> i64 {
+    let input = input
+        .lines()
+        .map(|line| {
+            let parts = line.split(" ").collect_vec();
+            let color = parts[2].to_string();
+            let color = color[2..color.len() - 1].to_string();
+            //convert color from hex to a u64
+            println!("The color is {}", color);
+            let color_number = i64::from_str_radix(&color, 16).unwrap();
+            let last_char_in_last_part = color.chars().last().unwrap();
+            let last_char_number = last_char_in_last_part.to_digit(10).unwrap();
+            let direction = match last_char_number {
+                0 => Direction::Right(color_number),
+                1 => Direction::Up(color_number),
+                2 => Direction::Left(color_number),
+                3 => Direction::Down(color_number),
+                _ => panic!("Unknown direction"),
+            };
+            direction
+        })
+        .collect_vec();
+    solve_inner(input)
 }
 
 fn parse_input(input: &str) -> Vec<(Direction, String)> {

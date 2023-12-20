@@ -166,7 +166,7 @@ pub mod parser {
 
     // parses the input of the form
     // key=1223
-    fn parse_kv(input: &str) -> IResult<&str, (&str, usize)> {
+    pub fn parse_kv(input: &str) -> IResult<&str, (&str, usize)> {
         let (input, (key, _, value)) =
             tuple((take_while1(|c: char| c.is_alphabetic()), char('='), digit1))(input)?;
         let value = value.parse::<usize>().unwrap();
@@ -174,7 +174,93 @@ pub mod parser {
     }
 }
 
-fn evaluate_program(program: &Vec<Program>, memory: &Xmas) -> bool {
+use std::collections::HashMap;
+
+// Based on https://github.com/mebeim/aoc/blob/master/2023/README.md#day-19---aplenty
+
+fn recursive_count(
+    workflows: &HashMap<String, (Vec<Instruction>, Terminal)>,
+    ranges: &mut HashMap<String, (i64, i64)>,
+    cur: &Terminal,
+) -> i64 {
+    match cur {
+        Terminal::Stop(End::Accept) => ranges.values().map(|&(lo, hi)| hi - lo + 1).product(),
+        Terminal::Stop(End::Reject) => 0,
+        Terminal::Goto(label) => {
+            let (rules, last) = workflows.get(label).unwrap();
+            let mut total = 0;
+
+            for instruction in rules {
+                match instruction {
+                    Instruction::Check((comparison, next_state)) => {
+                        let (lo, hi) = ranges.get(&comparison.variable).unwrap().clone();
+                        if comparison.operator == '<' {
+                            if lo < comparison.value.into() {
+                                let mut next_ranges = ranges.clone();
+                                next_ranges.insert(
+                                    comparison.variable.clone(),
+                                    (lo, (comparison.value - 1).into()),
+                                );
+                                total += recursive_count(workflows, &mut next_ranges, next_state);
+                            }
+                            ranges.insert(
+                                comparison.variable.clone(),
+                                (std::cmp::max(lo, comparison.value.into()), hi),
+                            );
+                        } else {
+                            if hi > comparison.value.into() {
+                                let mut next_ranges = ranges.clone();
+                                next_ranges.insert(
+                                    comparison.variable.clone(),
+                                    ((comparison.value + 1).into(), hi),
+                                );
+                                total += recursive_count(workflows, &mut next_ranges, next_state);
+                            }
+                            ranges.insert(
+                                comparison.variable.clone(),
+                                (lo, std::cmp::min(hi, comparison.value.into())),
+                            );
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            total += recursive_count(workflows, ranges, last);
+            total
+        }
+    }
+}
+
+pub fn solve_part_two(input: &str) -> i64 {
+    let parts = input.split("\n\n").collect_vec();
+    let programs = parts[0]
+        .lines()
+        .map_while(|line| {
+            let line = line.trim();
+            nom::combinator::all_consuming(parser::parse_program)(line)
+                .ok()
+                .map(|(_, program)| program)
+        })
+        .collect_vec();
+    let mut ranges = HashMap::new();
+    ranges.insert("x".to_string(), (1, 4000));
+    ranges.insert("m".to_string(), (1, 4000));
+    ranges.insert("a".to_string(), (1, 4000));
+    ranges.insert("s".to_string(), (1, 4000));
+    let workflows = programs
+        .iter()
+        .map(|program| {
+            (
+                program.name.clone(),
+                (program.instructions.clone(), Terminal::Stop(End::Reject)),
+            )
+        })
+        .collect::<HashMap<String, (Vec<Instruction>, Terminal)>>();
+    recursive_count(&workflows, &mut ranges, &Terminal::Goto("in".to_string()))
+}
+
+pub(crate) fn evaluate_program(program: &Vec<Program>, memory: &Xmas) -> bool {
     //convert the program to a hashmap
     let program = program
         .iter()
@@ -279,7 +365,7 @@ mod tests {
     #[test]
     fn solves_19_2_easy() {
         let input = std::fs::read_to_string("input/19_easy.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 167409079868000);
     }
 
     #[test]

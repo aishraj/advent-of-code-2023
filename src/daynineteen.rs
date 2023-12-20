@@ -179,7 +179,7 @@ use std::collections::HashMap;
 // Based on https://github.com/mebeim/aoc/blob/master/2023/README.md#day-19---aplenty
 
 fn recursive_count(
-    workflows: &HashMap<String, (Vec<Instruction>, Terminal)>,
+    workflows: &HashMap<String, Vec<Instruction>>,
     ranges: &mut HashMap<String, (i64, i64)>,
     cur: &Terminal,
 ) -> i64 {
@@ -187,12 +187,13 @@ fn recursive_count(
         Terminal::Stop(End::Accept) => ranges.values().map(|&(lo, hi)| hi - lo + 1).product(),
         Terminal::Stop(End::Reject) => 0,
         Terminal::Goto(label) => {
-            let (rules, last) = workflows.get(label).unwrap();
+            let instructions = workflows.get(label).unwrap();
             let mut total = 0;
 
-            for instruction in rules {
+            for instruction in instructions {
                 match instruction {
                     Instruction::Check((comparison, next_state)) => {
+                        println!("var is {}", comparison.variable);
                         let (lo, hi) = ranges.get(&comparison.variable).unwrap().clone();
                         if comparison.operator == '<' {
                             if lo < comparison.value.into() {
@@ -222,11 +223,19 @@ fn recursive_count(
                             );
                         }
                     }
-                    _ => {}
+                    Instruction::Terminal(Terminal::Goto(pos)) => {
+                        total += recursive_count(
+                            workflows,
+                            &mut ranges.clone(),
+                            &Terminal::Goto(pos.clone()),
+                        );
+                    }
+                    Instruction::Terminal(term) => {
+                        total += recursive_count(workflows, &mut ranges.clone(), term);
+                    }
                 }
             }
 
-            total += recursive_count(workflows, ranges, last);
             total
         }
     }
@@ -250,13 +259,8 @@ pub fn solve_part_two(input: &str) -> i64 {
     ranges.insert("s".to_string(), (1, 4000));
     let workflows = programs
         .iter()
-        .map(|program| {
-            (
-                program.name.clone(),
-                (program.instructions.clone(), Terminal::Stop(End::Reject)),
-            )
-        })
-        .collect::<HashMap<String, (Vec<Instruction>, Terminal)>>();
+        .map(|program| (program.name.clone(), program.instructions.clone()))
+        .collect::<HashMap<String, Vec<Instruction>>>();
     recursive_count(&workflows, &mut ranges, &Terminal::Goto("in".to_string()))
 }
 
@@ -371,6 +375,6 @@ mod tests {
     #[test]
     fn solves_19_2_hard() {
         let input = std::fs::read_to_string("input/19_real.txt").unwrap();
-        assert_eq!(super::solve_part_one(&input), 42);
+        assert_eq!(super::solve_part_two(&input), 138616621185978);
     }
 }

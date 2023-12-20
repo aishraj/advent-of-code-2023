@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, path};
+use std::{collections::BTreeSet};
 
 use itertools::Itertools;
 

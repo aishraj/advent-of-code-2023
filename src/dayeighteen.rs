@@ -14,7 +14,7 @@ pub fn solve_part_one(input: &str) -> u32 {
     let mut grid = vec![vec!['.'; 10000]; 10000];
     let mut cur_x: i64 = 5000;
     let mut cur_y: i64 = 5000;
-    let point = (cur_x, cur_y);
+    let _point = (cur_x, cur_y);
     let mut wall_count = 0;
     for (direction, _) in input.into_iter() {
         match direction {
@@ -118,7 +118,7 @@ pub fn solve_part_one(input: &str) -> u32 {
     count + wall_count
 }
 
-pub fn solve_part_two(input: &str) -> u32 {
+pub fn solve_part_two(_input: &str) -> u32 {
     42
 }
 

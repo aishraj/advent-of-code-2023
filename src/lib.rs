@@ -16,6 +16,7 @@ pub mod dayten;
 pub mod daythirteen;
 pub mod daythree;
 pub mod daytwenty;
+pub mod daytwentyone;
 pub mod daytwleve;
 pub mod daytwo;
 pub mod utils;
